@@ -82,7 +82,7 @@ public class TempUserController {
      */
     @ResponseBody
     @RequestMapping("doDownloadFile")
-    public Object doDownloadFile(HttpServletRequest request,HttpServletResponse response){
+    public void doDownloadFile(HttpServletRequest request,HttpServletResponse response){
         File file=new File("D:\\Elasticsearch权威指南（中文版）.pdf");
         String fileName=file.getName();
         
@@ -109,10 +109,6 @@ public class TempUserController {
         }catch (Exception e){
             e.printStackTrace();
         }
-        Map<String,Object> resultMap=new HashMap<>();
-        resultMap.put("success",true);
-        resultMap.put("message","下载完成");
-        return resultMap;
     }
     
     /**
