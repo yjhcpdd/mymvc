@@ -8,10 +8,10 @@ import lombok.Data;
 @Data
 public class TempUser {
     
-    private String userCode;
-    
     private String userName;
     
     private Integer age;
+    
+    
     
 }
