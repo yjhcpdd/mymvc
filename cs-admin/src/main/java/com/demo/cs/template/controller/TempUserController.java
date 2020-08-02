@@ -1,6 +1,7 @@
 package com.demo.cs.template.controller;
 
 import com.demo.cs.template.bean.TempUser;
+import com.demo.cs.template.mapper.ext.model.ExtTempDbUser;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -123,5 +125,6 @@ public class TempUserController {
         resultMap.put("message",tempUser.toString());
         return resultMap;
     }
+    
     
 }
