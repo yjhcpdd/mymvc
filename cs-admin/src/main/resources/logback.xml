@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--【configuration属性配置】
+    （1）scan:当此属性设置为true时，配置文件如果发生改变，将会被重新加载，默认值为true。
+    （2）scanPeriod:设置监测配置文件是否有修改的时间间隔，如果没有给出时间单位，默认单位是毫秒。当scan为true时，此属性生效。默认的时间间隔为1分钟。
+    （3）debug:当此属性设置为true时，将打印出logback内部日志信息，实时查看logback运行状态。默认值为false。-->
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+    <!-- 上下文名称，默认default -->
+    <!--<contextName>default</contextName>-->
+    
+    <!-- 定义变量：通用日志输出格式
+     %d:日期；%thread：线程名；%-5level：左对齐5个字符显示日志级别；%logger：日志位置；%msg：日志消息；%n：换行符；-->
+    <property name="COMMON_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss} [%thread] [%-5level] %logger - %msg%n" />
+    <!-- 定义变量：日志文件输出路径 -->
+    <property name="LOG_HOME" value="D:/logback-logs" />
+    
+    <!-- 日志写到控制台（appender：负责写日志的组件） -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- 输出格式化 -->
+            <pattern>${COMMON_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- debug输出到文件（每天生成带日期文件，文件大小最大1k） -->
+    <appender name="DEBUG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!--<file>${LOG_HOME}/debug.log</file>-->
+        <!-- 日志过滤器，只过滤需要的日志 -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>  
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <!-- 按照日期和大小循环生成日志 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 文件名格式 -->
+            <fileNamePattern>${LOG_HOME}/debug.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- 每个文件最大 -->
+            <maxFileSize>10KB</maxFileSize>
+            <!-- 日志最大的历史 60天 -->
+            <maxHistory>60</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <!-- 输出格式化 -->
+            <pattern>${COMMON_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- “根”日志的记录器（root日志记录器的默认level是DEBUG），最多一个root元素
+     日志级别：TRACE<DEBUG<INFO<WARN<ERROR
+     日志级别定义在类：ch.qos.logback.classic.Level-->
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="DEBUG_FILE"/>
+    </root>
+    
+</configuration>
