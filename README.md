@@ -1,2 +1,2 @@
-#SSM环境搭建
+# SSM环境搭建
 spring+springMvc+mybatis
