@@ -2,6 +2,7 @@ package com.demo.cs.template.controller;
 
 import com.demo.cs.template.bean.TempUser;
 import com.demo.cs.template.mapper.ext.model.ExtTempDbUser;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -27,6 +28,7 @@ import java.util.Map;
  * 用户列表
  * 测试页面请求路径：http://localhost:8080/cs-admin/tempUser/init?userName=张三&age=15
  */
+@Slf4j
 @Controller
 @RequestMapping("tempUser")
 public class TempUserController {
@@ -39,7 +41,6 @@ public class TempUserController {
     public ModelAndView init(TempUser form){
         ModelAndView modelAndView=new ModelAndView("template/user/user_list");
         modelAndView.addObject("model",form);
-        
         return modelAndView;
     }
     
@@ -126,5 +127,28 @@ public class TempUserController {
         return resultMap;
     }
     
+    /**
+     * 日志打印测试
+     * @param tempUser
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping("doLogPrint")
+    public Object doLogPrint(){
+        log.info("info test...");
+        log.debug("debug test...");
+        log.warn("warn test...");
+        log.error("error test...");
+        //测试记录异常
+        try {
+            int a=1/0;
+        }catch (Exception e){
+            log.error(e.getMessage(),e);
+        }
+        Map<String,Object> resultMap=new HashMap<>();
+        resultMap.put("success",true);
+        resultMap.put("message","");
+        return resultMap;
+    }
     
 }

@@ -10,8 +10,8 @@
     <!-- 定义变量：通用日志输出格式
      %d:日期；%thread：线程名；%-5level：左对齐5个字符显示日志级别；%logger：日志位置；%msg：日志消息；%n：换行符；-->
     <property name="COMMON_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss} [%thread] [%-5level] %logger - %msg%n" />
-    <!-- 定义变量：日志文件输出路径 -->
-    <property name="LOG_HOME" value="D:/logback-logs" />
+    <!-- 定义变量：日志文件输出路径(只可定义绝对路径，${catalina.home}为环境变量中的tomcat根目录) -->
+    <property name="LOG_HOME" value="${catalina.home}/logback-logs" />
     
     <!-- 日志写到控制台（appender：负责写日志的组件） -->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
@@ -21,9 +21,9 @@
         </encoder>
     </appender>
 
-    <!-- debug输出到文件（每天生成带日期文件，文件大小最大1k） -->
+    <!-- ==========DEBUG级别日志配置========== -->
+    <!-- DEBUG输出到文件（每天生成带日期文件，文件大小最大1k） -->
     <appender name="DEBUG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <!--<file>${LOG_HOME}/debug.log</file>-->
         <!-- 日志过滤器，只过滤需要的日志 -->
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>DEBUG</level>  
@@ -33,16 +33,91 @@
         <!-- 按照日期和大小循环生成日志 -->
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- 文件名格式 -->
-            <fileNamePattern>${LOG_HOME}/debug.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>${LOG_HOME}/%d{yyyy-MM-dd}/debug.%d{yyyy-MM-dd}.(%i).%d{HHmmss}.log</fileNamePattern>
             <!-- 每个文件最大 -->
-            <maxFileSize>10KB</maxFileSize>
-            <!-- 日志最大的历史 60天 -->
-            <maxHistory>60</maxHistory>
+            <maxFileSize>100MB</maxFileSize>
+            <!-- 日志最大的历史 10天 -->
+            <maxHistory>10</maxHistory>
         </rollingPolicy>
         <encoder>
             <!-- 输出格式化 -->
             <pattern>${COMMON_LOG_PATTERN}</pattern>
         </encoder>
+    </appender>
+    <!-- 异步DEBUG输出到文件（使用异步日志，先写入阻塞队列，再写入磁盘。避免日志记录时会占用大量的CPU和IO资源） -->
+    <appender name="ASYNC_DEBUG_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- 默认当BlockingQueue还有20%容量，将丢弃TRACE、DEBUG和INFO级别的event，只保留WARN和ERROR级别的event。为了保持所有的events，设置该值为0。 -->
+        <discardingThreshold>0</discardingThreshold>
+        <!-- 队列大小，默认256，该值会影响性能 -->
+        <queueSize>1024</queueSize>
+        <!-- 关联appender -->
+        <appender-ref ref="DEBUG_FILE"/>
+    </appender>
+
+    <!-- ==========WARN级别日志配置========== -->
+    <!-- WARN输出到文件（每天生成带日期文件，文件大小最大1k） -->
+    <appender name="WARN_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 日志过滤器，只过滤需要的日志 -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>WARN</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <!-- 按照日期和大小循环生成日志 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 文件名格式 -->
+            <fileNamePattern>${LOG_HOME}/%d{yyyy-MM-dd}/warn.%d{yyyy-MM-dd}.(%i).%d{HHmmss}.log</fileNamePattern>
+            <!-- 每个文件最大 -->
+            <maxFileSize>100MB</maxFileSize>
+            <!-- 日志最大的历史 10天 -->
+            <maxHistory>10</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <!-- 输出格式化 -->
+            <pattern>${COMMON_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+    <!-- 异步WARN输出到文件（使用异步日志，先写入阻塞队列，再写入磁盘。避免日志记录时会占用大量的CPU和IO资源） -->
+    <appender name="ASYNC_WARN_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- 默认当BlockingQueue还有20%容量，将丢弃TRACE、DEBUG和INFO级别的event，只保留WARN和ERROR级别的event。为了保持所有的events，设置该值为0。 -->
+        <discardingThreshold>0</discardingThreshold>
+        <!-- 队列大小，默认256，该值会影响性能 -->
+        <queueSize>1024</queueSize>
+        <!-- 关联appender -->
+        <appender-ref ref="WARN_FILE"/>
+    </appender>
+
+    <!-- ==========ERROR级别日志配置========== -->
+    <!-- ERROR输出到文件（每天生成带日期文件，文件大小最大1k） -->
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 日志过滤器，只过滤需要的日志 -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <!-- 按照日期和大小循环生成日志 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 文件名格式 -->
+            <fileNamePattern>${LOG_HOME}/%d{yyyy-MM-dd}/error.%d{yyyy-MM-dd}.(%i).%d{HHmmss}.log</fileNamePattern>
+            <!-- 每个文件最大 -->
+            <maxFileSize>100MB</maxFileSize>
+            <!-- 日志最大的历史 10天 -->
+            <maxHistory>10</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <!-- 输出格式化 -->
+            <pattern>${COMMON_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+    <!-- 异步ERROR输出到文件（使用异步日志，先写入阻塞队列，再写入磁盘。避免日志记录时会占用大量的CPU和IO资源） -->
+    <appender name="ASYNC_ERROR_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- 默认当BlockingQueue还有20%容量，将丢弃TRACE、DEBUG和INFO级别的event，只保留WARN和ERROR级别的event。为了保持所有的events，设置该值为0。 -->
+        <discardingThreshold>0</discardingThreshold>
+        <!-- 队列大小，默认256，该值会影响性能 -->
+        <queueSize>1024</queueSize>
+        <!-- 关联appender -->
+        <appender-ref ref="ERROR_FILE"/>
     </appender>
     
     <!-- “根”日志的记录器（root日志记录器的默认level是DEBUG），最多一个root元素
@@ -50,7 +125,9 @@
      日志级别定义在类：ch.qos.logback.classic.Level-->
     <root level="DEBUG">
         <appender-ref ref="STDOUT"/>
-        <appender-ref ref="DEBUG_FILE"/>
+        <appender-ref ref="ASYNC_DEBUG_FILE"/>
+        <appender-ref ref="ASYNC_WARN_FILE"/>
+        <appender-ref ref="ASYNC_ERROR_FILE"/>
     </root>
     
 </configuration>

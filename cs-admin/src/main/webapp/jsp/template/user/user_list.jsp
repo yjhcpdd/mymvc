@@ -46,6 +46,10 @@
         <h3>json请求</h3>
         <input type="button" value="发起请求" onclick="doJsonBusinessAction()">
     </div>
+    <div>
+        <h3>日志打印测试</h3>
+        <a href="<%=basePath%>/tempUser/doLogPrint">日志打印测试</a>
+    </div>
     <script>
         //发起json业务请求
         var doJsonBusinessAction=function () {
