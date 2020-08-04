@@ -152,7 +152,7 @@
      日志级别定义在类：ch.qos.logback.classic.Level-->
     <root level="WARN">
         <appender-ref ref="STDOUT"/>
-        <appender-ref ref="DEBUG_FILE"/>
+        <appender-ref ref="ASYNC_DEBUG_FILE"/>
         <appender-ref ref="ASYNC_WARN_FILE"/>
         <appender-ref ref="ASYNC_ERROR_FILE"/>
     </root>
