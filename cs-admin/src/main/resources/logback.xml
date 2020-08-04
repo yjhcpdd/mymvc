@@ -162,9 +162,9 @@
         value：最小日志级别
         additivity：（false：子logger只在自己的appender中输出；true：logger不止会在自己的appender里输出，还会在root的logger的appender里输出）
          -->
-    <logger name="com.demo.cs.template.controller" level="INFO" additivity="false">
+    <!--<logger name="com.demo.cs.template.controller" level="INFO" additivity="false">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="ASYNC_CUSTOM_FILE"/>
-    </logger>
+    </logger>-->
     
 </configuration>
