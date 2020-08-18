@@ -18,7 +18,7 @@
 
         <spring.version>5.2.2.RELEASE</spring.version>
         <jackson.databind.version>2.11.0</jackson.databind.version>
-        <mysql.connector.java>5.1.30</mysql.connector.java>
+        <mysql.connector.java>8.0.16</mysql.connector.java>
         
         <shiro.version>1.5.3</shiro.version>
     </properties>
