@@ -14,7 +14,7 @@
     </context:component-scan>
 
     <!-- 引入配置文件 -->
-    <context:property-placeholder location="classpath:properties/jdbc.properties,classpath:properties/system.properties" />
+    <context:property-placeholder location="classpath:properties/jdbc.properties,classpath:properties/system.properties,classpath:properties/redis.properties" />
 
     <!-- 使用cglib动态代理（默认为JDK动态代理，只可代理接口实现） -->
     <aop:aspectj-autoproxy proxy-target-class="true" />

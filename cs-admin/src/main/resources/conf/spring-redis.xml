@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- 密码配置 -->
+    <bean id="redisPassword" class="org.springframework.data.redis.connection.RedisPassword" factory-method="of">
+        <constructor-arg name="passwordAsString" value="${redis.password}" />
+    </bean>
+    
+    <!-- 连接配置 -->
+    <bean id="redisStandaloneConfiguration"
+          class="org.springframework.data.redis.connection.RedisStandaloneConfiguration">
+        <property name="hostName" value="${redis.hostName}"/>
+        <property name="port" value="${redis.port}"/>
+        <property name="password" ref="redisPassword"/>
+        <property name="database" value="${redis.database}"/>
+    </bean>
+
+    <!-- 连接池配置（根据需要配置连接池优化参数） -->
+    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        
+    </bean>
+
+    <!-- 客户端连接配置 -->
+    <bean id="jedisClientConfiguration"
+          class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory$MutableJedisClientConfiguration"
+          factory-method="create">
+        <constructor-arg name="jedisPoolConfig" ref="jedisPoolConfig"/>
+    </bean>
+
+    <!-- 连接工厂 -->
+    <bean id="jedisConnectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+        <!-- "单机"连接配置 -->
+        <constructor-arg name="standaloneConfig" ref="redisStandaloneConfiguration"/>
+        <!-- 客户端连接配置 -->
+        <constructor-arg name="clientConfig" ref="jedisClientConfiguration"/>
+    </bean>
+
+    <!-- 字符串句柄 -->
+    <bean id="stringRedisTemplate" class="org.springframework.data.redis.core.StringRedisTemplate">
+        <constructor-arg name="connectionFactory" ref="jedisConnectionFactory"/>
+    </bean>
+
+
+</beans>
