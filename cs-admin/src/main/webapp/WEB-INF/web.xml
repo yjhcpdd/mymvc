@@ -1,0 +1,82 @@
+<!DOCTYPE web-app PUBLIC
+        "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+        "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<web-app>
+    <display-name>cs-admin</display-name>
+
+    <!-- logback日志配置(不需要配置)
+    此配置用于：(1)替换logbackConfigLocation内容中的占位符${}[用于不同环境引用不同的配置文件]，默认即会进行替换；
+              (2)JUL桥接到SLF4J[已在pom中进行了桥接，此处不再需要]；） -->
+    <!--<context-param>
+        <param-name>logbackConfigLocation</param-name>
+        <param-value>classpath:logback.xml</param-value>
+    </context-param>
+    <listener>
+        <listener-class>ch.qos.logback.ext.spring.web.LogbackConfigListener</listener-class>
+    </listener>-->
+    
+    <!-- ============【spring配置】============ -->
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>
+            classpath:conf/spring.xml,
+            classpath:conf/spring-mybatis.xml,
+            classpath:conf/spring-shiro.xml,
+            classpath:conf/spring-redis.xml
+        </param-value>
+    </context-param>
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+    
+    <!-- ============【springMvc配置】============ -->
+    <!-- spring编码过滤器(防止“post提交”、“上传文件文件名”中文乱码) -->
+    <filter>
+        <filter-name>characterEncodingFilter</filter-name>
+        <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>characterEncodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <!-- springMVC核心servlet -->
+    <servlet>
+        <servlet-name>spring</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath:conf/spring-mvc.xml</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>spring</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+
+    <!-- ============【shiro配置】============ -->
+    <filter>
+        <!-- filter-name的值需和spring-shiro.xml中的shiro的主bean的id一致（通过spring容器来管理filter的生命周期） -->
+        <filter-name>shiroFilter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+        <init-param>
+            <!-- 强制让spring管理filter的生命周期(Filter.init、Filter.destroy) -->
+            <param-name>targetFilterLifecycle</param-name>url-pattern
+            <param-value>true</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>shiroFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    
+    <welcome-file-list>
+        <welcome-file>/index.jsp</welcome-file>
+    </welcome-file-list>
+    
+</web-app>

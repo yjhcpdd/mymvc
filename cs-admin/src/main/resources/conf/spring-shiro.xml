@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    
+    <!-- ==========【Realm配置】========== -->
+    <!-- 自定义Realm（数据源） -->
+    <bean id="demoRealm" class="com.demo.cs.template.shiro.redis.CsDemoRealm" />
+    
+    <!-- ==========【sessionManager配置】========== -->
+    <!-- 定制cookie配置 -->
+    <bean id="demoSimpleCookie" class="org.apache.shiro.web.servlet.SimpleCookie">
+        <!-- 重写覆盖默认的"JSESSIONID" -->
+        <property name="name" value="JSESSIONID_CUS"/>
+    </bean>
+    <!-- redis的session存储 -->
+    <bean id="demoSessionDAO" class="com.demo.cs.template.shiro.redis.CsDemoSessionDAO" >
+        <!-- redis句柄 -->
+        <property name="stringRedisTemplate" ref="stringRedisTemplate"/>
+        <!-- 自定义sessionKey前缀 -->
+        <property name="sessionKeyPrefix" value="session_" />
+    </bean>
+    <!-- 会话管理器 -->
+    <bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+        <!-- 全局会话超时时间（单位：毫秒，默认30分钟） -->
+        <property name="globalSessionTimeout" value="3600000" />
+        <!-- session的cookie配置 -->
+        <property name="sessionIdCookie" ref="demoSimpleCookie" />
+        <!-- 会话存储层 -->
+        <property name="sessionDAO" ref="demoSessionDAO" />
+    </bean>
+    
+    <!-- ==========【安全缓存管理器】========== -->
+    <!-- 缓存管理器 -->
+    <bean id="demoSecurityCacheManager" class="com.demo.cs.template.shiro.redis.CsDemoSecurityCacheManager">
+        <!-- redis句柄 -->
+        <property name="stringRedisTemplate" ref="stringRedisTemplate"/>
+    </bean>
+    
+    <!-- 安全管理器 -->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <!-- 自定义Realm -->
+        <property name="realm" ref="demoRealm" />
+        <!-- 会话管理器 -->
+        <property name="sessionManager" ref="sessionManager" />
+        <!-- 缓存管理器 -->
+        <property name="cacheManager" ref="demoSecurityCacheManager" />
+    </bean>
+
+    <!-- ==========【自定义过滤器】========== -->
+    <!-- 登出过滤器 -->
+    <bean id="logoutFilter" class="com.demo.cs.template.shiro.redis.CsDemoLogoutFilter">
+        <property name="redirectUrl" value="/" />
+    </bean>
+    
+    <!-- ==========【配置入口】========== -->
+    <!-- shiro的主过滤器（id需和web.xml中的shiro的filter的filter-name一致） -->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <!-- 安全管理器 -->
+        <property name="securityManager" ref="securityManager" />
+        <!-- 登录页面路径 -->
+        <property name="loginUrl" value="/index.jsp" />
+        <!-- 无授权页面路径 -->
+        <property name="unauthorizedUrl" value="/" />
+        <!-- 登录成功后跳转路径 -->
+        <property name="successUrl" value="/" />
+        <!-- 权限过滤器链（从上至下，匹配到即返回） -->
+        <property name="filterChainDefinitions">
+            <value>
+                /tmpLogin/initLogin = anon
+                /tmpLogin/login = anon
+                /logout = logout
+                /** = authc
+            </value>
+        </property>
+        <!-- 自定义过滤器 -->
+        <property name="filters">
+            <map>
+                <entry key="logoutFilter" value-ref="logoutFilter" />
+            </map>
+        </property>
+    </bean>
+    
+</beans>

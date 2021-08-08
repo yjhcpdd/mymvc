@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!-- =====数据源===== -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <property name="driverClassName" value="${mysql.jdbc.driver}"/>
+        <property name="url" value="${mysql.jdbc.url}"/>
+        <property name="username" value="${mysql.jdbc.username}"/>
+        <property name="password" value="${mysql.jdbc.password}"/>
+    </bean>
+
+    <!-- =====session工厂===== -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <!-- mybatis全局配置文件 -->
+        <property name="configLocation" value="classpath:conf/mybatis-config.xml"/>
+        <!-- 加载mapper配置文件
+            (默认“src/main/java”路径下，只有.class文件会放到编译后的目录进行打包，其他xml等文件不会放到编译后目录，需在pom文件的build环节配置) 【fx:01】
+            (需用"classpath*:"，而不是"classpath:"，否则单元测试时，无法加载到Mapper.xml)
+            -->
+        <property name="mapperLocations" value="classpath*:com/demo/cs/**/*.xml"/>
+    </bean>
+    
+    <!-- =====mapper包扫描器，将扫描到的接口注册为dao层的bean===== -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+        <!-- 包扫描路径 -->
+        <property name="basePackage" value="com.demo.cs.template.mapper.auto,com.demo.cs.template.mapper.ext"/>
+    </bean>
+
+    <!-- =====事务管理器===== -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!-- =====事务支持一：支持式注解事务（@Transactional）；注解式事务order为0，“注解事务”优先“声明式事务”===== -->
+    <tx:annotation-driven transaction-manager="transactionManager" order="0" />
+    
+    <!-- =====事务支持二：支持声明式事务（方法名匹配）；声明式事务order为1，“注解事务”优先“声明式事务”===== -->
+    <!-- 事务传播特性（事务通知） -->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <!-- REQUIRED：如果存在一个事务，则支持当前事务。如果没有事务则开启一个新的事务 -->
+            <tx:method name="insert*" propagation="REQUIRED" rollback-for="Exception"/>
+            <tx:method name="update*" propagation="REQUIRED" rollback-for="Exception"/>
+            <tx:method name="delete*" propagation="REQUIRED" rollback-for="Exception"/>
+            <!-- SUPPORTS：支持当前事务，如果当前没有事务，就以非事务方式执行 -->
+            <tx:method name="find" propagation="SUPPORTS" read-only="true"/>
+            <tx:method name="get" propagation="SUPPORTS" read-only="true"/>
+        </tx:attributes>
+    </tx:advice>
+    <!-- 配置切面，使事务生效 -->
+    <aop:config >
+        <!-- 切点(配置增强业务点) -->
+        <aop:pointcut id="txPointcut" expression="execution(* com.demo.cs..*Service.*(..))"/>
+        <!-- 通知(增强) -->
+        <aop:advisor id="txAdvisor" advice-ref="txAdvice" pointcut-ref="txPointcut" order="1" />
+    </aop:config>
+    
+</beans>
